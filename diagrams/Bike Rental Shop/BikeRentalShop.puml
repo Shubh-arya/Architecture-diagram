@@ -1,0 +1,169 @@
+@startuml
+'Product Management
+'Rental Management
+'Inventory Management
+'Payment Management
+title Bike Rental Shop
+
+enum ProductStatus{
+    AVAILABLE
+    RENTED
+}
+
+enum ProductType{
+    BIKE
+    SCOOTER
+}
+
+class Shop {
+    name: String
+    location: String
+    locationId: UUID
+    Address1: String
+    Address2: String
+    City: String
+    Country: String
+    zipCode: int
+    status: ShopStatus
+}
+
+enum ShopStatus {
+    OPEN
+    CLOSED
+}
+
+abstract class Product {
+    -productId: int
+    -name: String
+    -type: ProductType
+    -status: ProductStatus
+    -rentalPrice: double
+    -active: boolean
+    -location: UUID
+    -shopId: UUID
+    +constructor(AllArgs)
+    +Getter()
+    +Setter()
+}
+
+enum BikeSize{
+    SMALL
+    MEDIUM
+    LARGE
+}
+
+class Bike extends Product {
+    -size: BikeSize
+    +constructor(AllArgs)
+    +Getter()
+    +Setter()
+}
+
+enum MotorType{
+    ELECTRIC
+    GAS
+}
+
+class Scooter extends Product {
+    -motorType: MotorType
+    +constructor(AllArgs)
+    +Getter()
+    +Setter()
+}
+
+class Customer {
+    -customerId: UUID
+    -name: String
+    -contactInfo: String
+    -balance: double
+    +constructor(AllArgs)
+    +Getter()
+    +Setter()
+}
+
+class Rental {
+    -rentalId: UUID
+    -productId: UUID
+    -customerId: UUID
+    -startTime: DateTime
+    -endTime: DateTime
+    -pickupShopId: int
+    -dropOffShopId: int
+    +constructor(AllArgs)
+    +Getter()
+    +Setter()
+}
+
+class RentalService {
+    +addRental(rental: Rental): void
+    +getRentedProducts(): List<Product>
+    +getOverdueRentals(): List<Rental>
+    +removeRental(rental: UUID): boolean
+}
+
+class InventoryService {
+    +addProduct(product: Product): void
+    +removeProduct(productId: UUID): void
+    +getAvailableProducts(): List<Product>
+    +getProductCountBySize(size: String): int
+}
+
+class CustomerService {
+    +addCustomer(customer: Customer): void
+    +getCustomerBalance(customerId: UUID): double
+    +updateCustomerBalance(customerId: UUID, amount: double): void
+    +getCustomerRentals(customerId: int): List<Rental>
+}
+
+class Payment {
+    -paymentId: int
+    -customerId: int
+    -amount: double
+    -paymentDate: Date
+    +Payment(paymentId: int, customerId: int, amount: double, paymentDate: Date)
+    +getCustomerId(): int
+    +getAmount(): double
+    +getPaymentDate(): Date
+}
+
+class PaymentService {
+    -paymentAdapter: HttpClient
+
+    initiatePayment(double: amount);
+}
+
+class ShopService {
+    updateShopStatus(shopStatus: ShopStatus)
+}
+
+interface CustomerRepository<Customer, UUID> implements CRUDRepository {}
+interface PaymentRepository<Payment, UUID> implements CRUDRepository{}
+interface RentalRepository<Rental, UUID> implements CRUDRepository{}
+interface ProductRepository<Product, UUID> implements CRUDRepository{}
+interface ShopRepository<Shop, UUID> implements CRUDRepository{}
+
+Product "1" *-- "1..*" Rental
+Customer "1" *-- "1..*" Rental
+Customer *-- "0..*" Payment
+Scooter "has" --> MotorType
+Bike "has" --> BikeSize
+Product "has" --> ProductStatus
+Product "has" --> ProductType
+PaymentService "uses" --> PaymentRepository
+PaymentRepository "uses" --> Payment
+
+CustomerService "uses" --> CustomerRepository
+CustomerRepository --> Customer
+
+RentalService "Uses" --> RentalRepository
+RentalRepository --> Rental
+
+InventoryService "Uses" --> ProductRepository
+ProductRepository --> Product
+
+Shop "1" *-- "many" Product
+Shop  "has" --> ShopStatus
+ShopService "uses" --> ShopRepository
+ShopRepository --> Shop
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Container>
+'left to right direction
+LAYOUT_WITH_LEGEND()
+SHOW_LEGEND()
+Person(User, "User", "End Users")
+System_Boundary(Wayfair, "Wayfair"){
+    Person(DomainUser, "Domain User", "Internal users who would create Urls")
+    Container(gateway, "Api Gateway", "Auth, rate limiting, header modification etc")
+    Container(LoadBalancer, "Load balancer")
+    Container(createService, "Url Creation Service", "auto hpa enabled n instances")
+    Container(readService, "Url Read Service", "auto hpa enabled n instances")
+    Container(tokenService, "Token Generation Service", "Generate number ranges for services to be used for Base 62 short url generation")
+    ContainerDb(dbReplica, "DB Replica")
+    ContainerDb(db, "DB")
+    ContainerDb(cache, "Cache DB", "Distributed cache with LRU eviction policy")
+    Boundary(Analytics, Analytics){
+        ContainerQueue(kafka, "Kafka")
+        Container(spark, "Apache Spark Cluster")
+        ContainerDb(warehouse, "Data Warehouse")
+    }
+}
+
+
+Rel(User, gateway, "/short-url/create")
+Rel_R(DomainUser, gateway, "/short-url/read")
+Rel(gateway, LoadBalancer, "")
+Rel(LoadBalancer, createService, "")
+Rel(LoadBalancer, readService, "")
+Rel(createService, cache, "cache the newly created url for read services")
+Rel(readService, dbReplica, "")
+Rel(readService, cache, "")
+Rel(createService, db, "")
+Rel_L(readService, kafka, "send click metrics")
+Rel_R(kafka, spark, "")
+Rel_R(spark, warehouse, "")
+Rel_R(createService, tokenService, "Get number ranges to generate Base62 tokens")
+Rel_R(db, dbReplica, "replicate data")
+'Lay_Distance(dbReplica, db, 1)
+@enduml

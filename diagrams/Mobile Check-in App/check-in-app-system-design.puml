@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "User", "Does check-in, look for places etc")
+Boundary(app, "Check-in Application"){
+    Container(proximityService, "Proximity Service")
+    Container(businessService, "Business Service")
+    ContainerDb(BusinessDB, "Business DB")
+    ContainerDb(BusinessDBReplica, "Business DB Replica Set")
+    Container(userService, "User Service")
+    ContainerDb(UserDB, "User DB")
+    Container(checkInService, "Check-in Service")
+    ContainerDb(CheckInDB, "Check-in DB")
+    ContainerDb(checkHistoryDB, "Check-in history DB")
+    Container(dis, "Data Integration pipeline")
+
+    Container(gateway, "Api Gateway")
+    Container(loadbalancer, "Load Balancer")
+}
+
+Rel(proximityService, BusinessDBReplica, "")
+Rel(businessService, BusinessDB, "")
+Rel(checkInService, CheckInDB, "")
+Rel(checkInService, checkHistoryDB, "")
+Rel(CheckInDB, dis, "fetch historical check-ins")
+Rel(dis, checkHistoryDB, "Move Historical check-ins")
+Rel(userService, UserDB, "")
+
+Rel(gateway, loadbalancer, "")
+Rel(loadbalancer, businessService, "")
+Rel(loadbalancer, userService, "")
+Rel(loadbalancer, checkInService, "")
+Rel(loadbalancer, proximityService, "")
+Rel(user, gateway, "")
+LAYOUT_WITH_LEGEND()
+@enduml
