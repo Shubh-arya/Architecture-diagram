@@ -1,0 +1,56 @@
+@startuml
+title Schema-digram
+Entity ParkingSpot {
+SpotId(PK) : UUID
+SpotType : SpotType
+SpotStatus: SpotStatus
+Active: Boolean
+
+Index on SpotStatus
+Index on SpotType
+trigger insert in ParkingSpotHistory for insert, update or delete
+}
+
+Entity ParkingSpotHistory {
+Id(PK): UUID
+SpotId : UUID
+SpotType : SpotType
+SpotStatus: SpotStatus
+Active: Boolean
+}
+
+Entity Ticket {
+TicketId(PK): UUID
+SpotId(FK) : UUID
+EntryTime: TimeStamp
+ExitTime: TimeStamp
+LicenceNumber: VarChar
+Amount: Double
+
+Index on SpotId
+trigger insert in TicketHistory for insert, update or delete
+}
+
+Entity TicketHistory {
+id(PK): UUID
+TicketId: UUID
+SpotId : UUID
+EntryTime: TimeStamp
+ExitTime: TimeStamp
+LicenceNumber: VarChar
+Amount: Double
+}
+
+Entity ParkingLot {
+Name: VarChar
+Address: VarChar
+PinCode: Number
+}
+
+ParkingLot "1" *-- "Many" ParkingSpot
+ParkingSpot "1" *-- "Many" Ticket
+ParkingSpot "1" *-- "Many" ParkingSpotHistory
+Ticket "1" *-- "Many" TicketHistory
+
+
+@enduml

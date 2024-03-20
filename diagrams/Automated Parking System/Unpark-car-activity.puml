@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+title UnPark activity diagram
+
+start
+:User.scanTicket() -> amountToPaid;
+:Terminal.producePaymentOptions -> PaymentOptions;
+:User.choosePaymentOptionAndInitiatePayment();
+if (PaymentService.initiateTransaction?) is (success) then
+elseif (Try Another Option) is (success))
+else
+    : Pay in cash;
+endif
+  :ParkingService.removeCarFromSpot(SpotID);
+  :Terminal.moveCarToTheLift(SpotID));
+  :Terminal.showMessage("Wait at the lift for your car");
+stop
+
+@enduml

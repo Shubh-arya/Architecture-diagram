@@ -1,0 +1,97 @@
+@startuml
+title Automated Parking System class
+ParkingSpot "has" --> SpotType
+ParkingSpot "Has" --> SpotStatus
+Ticket "Has" --> ParkingSpot
+ParkingPort "Has" --> ParkingUseCase
+ParkingUseCase "Has" --> ParkingSpotPersistencePort
+ParkingUseCase "Has" --> TicketPersistencePort
+ParkingPort "Has" --> PaymentUseCase
+PaymentUseCase "Has" --> WebClient
+ParkingSpotPersistencePort "Uses" --> ParkingSpot
+TicketPersistencePort "Uses" --> Ticket
+
+ParkingAvailabilityPort "Has" --> AvailabilityUseCase
+AvailabilityUseCase "Has" --> ParkingSpotPersistencePort
+ParkingSpotPersistencePort "Uses" --> ParkingSpot
+
+Enum SpotType {
+    SMALL(3), MEDIUM(2), LARGE(1)
+}
+
+class Ticket{
+    UUID ticketID
+    UUID SpotId
+    String licensePlate
+    LocalDateTime startTime
+    LocalDateTime endTime
+    Double amount
+}
+
+interface TicketPersistencePort {
+    UUID createTicket(Ticket ticket)
+    Ticket findTicket(UUID ticketId)
+    Ticket updateTicket(Ticket ticket)
+}
+
+interface ParkingSpotPersistencePort {
+    ParkingSpot createSpot(ParkingSpot parkingSpot)
+    Collection<ParkingSpot> findAllAvailable()
+    findAllAvailableForGivenType(SpotType spotType)
+    ParkingSpot updateSpot(ParkingSpot)
+
+}
+
+Enum SpotStatus {
+    AVAILABLE, OCCUPIED, RESERVED
+}
+
+class ParkingSpot {
+    UUID spotId
+    SpotType spotType
+    SpotStatus status
+    Boolen active
+}
+
+interface ParkingUseCase {
+
+Ticket parkVehicle(UUID spotId, String licensePlate)
+vacateParking(UUID ticketId)
+
+}
+
+interface AvailabilityUseCase {
+    List<ParkingSpot> getAllAvailableSpots()
+    UUID findSpot(SpotType spotType)
+}
+
+class ParkingPort {
+ParkingUseCase parkingUseCase
+PaymentUseCase paymentUseCase
+
+Ticket parkVehicle(UUID spotId, String licensePlate)
+vacateParking(UUID ticketId)
+
+}
+
+class PaymentUseCase {
+WebClient webclient
+
+Boolean makePayment(Double amount)
+
+}
+
+class ParkingAvailabilityPort {
+AvailabilityUseCase availbilityUseCase
+
+    List<ParkingSpot> getAllAvailableSpots()
+    UUID findSpot(SpotType spotType)
+}
+
+interface WebClient {
+PaymentService paymentService
+
+Boolean makePayment(Double amount)
+}
+
+@enduml

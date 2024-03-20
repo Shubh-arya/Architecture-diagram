@@ -1,0 +1,49 @@
+@startuml
+title Use case flow diagram:
+actor User
+Participant Parking_Front
+Participant Parking_Service
+Participant Payment_Service
+
+User -> Parking_Front: Scan my car for a Spot type
+Parking_Front --> Parking_Service: Find Available Spot for identified Type
+
+alt Parking Spot find case
+Parking_Service --> Parking_Front: Return spot Id
+Parking_Front --> Parking_Service: BookTheSpot
+Parking_Service --> Parking_Front: Return the ticket created.
+
+else no Spot available of the kind
+Parking_Service --> Parking_Front: No Spot available of the kind, if you are ok for a little higher price, try for bigger spot.
+
+  alt User choose to pay high price case
+    User --> Parking_Front: I agree for hight price
+    Parking_Front --> Parking_Service: get me bigger spots if available
+
+    alt bigger spot available case
+      Parking_Service --> Parking_Front: Return spotId
+      Parking_Front --> Parking_Service: BookTheSpot For this spotId
+    else Spots not available
+      Parking_Service --> Parking_Front: We are sorry, no spots availabel
+    end
+
+  else User refuses to pay high price
+    Parking_Front --> User: Thanks for visiting, you may leave!
+  end
+
+end
+
+
+User --> Parking_Front: Scan the ticket for checkout
+Parking_Front --> Parking_Service : Get the amount to be paid
+Parking_Service --> Parking_Front: return the amount
+Parking_Front --> User: Send the payment options to User
+User --> Parking_Front: User choose to Payment method.
+Parking_Front--> Payment_Service: Make the payment
+Parking_Service --> Parking_Front: return payment status
+Parking_Front --> User: Payment successful, checking out the car now.
+Parking_Front --> Parking_Service: Vacate the car
+Parking_Service --> Parking_Front: Parking spot is vacated
+Parking_Front --> User: moving car to Lift, please wait there.
+
+@enduml

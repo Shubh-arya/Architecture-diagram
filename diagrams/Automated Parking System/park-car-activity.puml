@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+title Park Car activity diagram
+
+start
+:User.scanCar() -> SpotType;
+if (Terminal.findAvailableSpot(SpotType)?) is (SpotID) then
+:true;
+
+label l1
+:ParkingService.ParkCar(SpotID) -> Ticket;
+:Terminal.printTicket();
+:Terminal.moveCarToTheSpot(SpotID));
+
+else (not available)
+:false;
+    if (Check for larger spot?) is (SpotID)) then
+     :true;
+     goto l1;
+    endif
+:Terminal.BetterLuckNextTime();
+stop
+endif
+stop
+
+
+@enduml
